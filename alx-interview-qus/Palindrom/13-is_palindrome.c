@@ -1,40 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "lists.h"
 
 /**
- * is_pal - recursively moves pointer to linked list node and match
- * @start: pointer to head (** gives different address so not same as end)
- * @end: pointer to last node
- * Return: 0 if not, 1 if palindrome
-*/
-
-int is_pal(listint_t **start, listint_t *end)
-{
-	if (end == NULL) /* pop off stack once ptr hits null; ptr is at end */
-		return (1);
-
-	/* recursively move end ptr to end; match; move ptrs inwards */
-	if (is_pal(start, end->next) && ((*start)->n == end->n))
-	{
-		*start = (*start)->next;
-		return (1);
-	}
-	return (0);
-}
-
-/**
- * is_palindrome - determine if singly linked list is palindrome
- * @head: pointer to head of singly linked list
- * Return: 0 if not, 1 if palindrome
-*/
+ * is_palindrome - Checks if a singly linked list is a palindrome.
+ * @head: Pointer to the head of the list 
+ * 
+ * Return: 0 if not a palindrome, 1 if a palindrome
+ */
 
 int is_palindrome(listint_t **head)
 {
-	listint_t *start = *head;
-	listint_t *end = *head;
+    listint_t *slow, *fast, *prev_slow, *mid, *second_half;
+    int palindrome = 1; /* Assume palindrome initially */
 
-	if (head == NULL) /* non-existing list is not */
-		return (0);
-	if (*head == NULL) /* one node list is palindrome */
-		return (1);
-	return (is_pal(&start, end));
+    if (*head == NULL || (*head)->next == NULL)
+        return (palindrome); /* Empty list or single node is a palindrome */
+
+    slow = *head;
+    fast = *head;
+    prev_slow = *head;
+
+    /* Move fast two steps and slow one step, find mid of the list*/
+    while (fast != NULL && fast->next != NULL)
+    {
+        fast = fast->next->next;
+        prev_slow = slow;
+        slow = slow->next;
+    }
+
+     /* If the number of elements is odd, move mid to the next node */
+     if (fast != NULL)
+     {
+        mid = slow;
+        slow = slow->next;
+     }
+
+     /* Reverse the second half of the list */
+     second_half = reverse_list(&slow);
+
+     /* Compare the reversed second half with the first half */
+     while (second_half != NULL)
+     {
+        if (prev_slow->n != second_half->n)
+        {
+            palindrome = 0;
+            break;
+        }
+        prev_slow = prev_slow->next;
+        second_half = second_half->next;
+     }
+
+     /* Restore the reversed second half */
+     reverse_list(&slow);
+
+     return (palindrome);
 }
+
+/**
+ * reverse_list - Reverses a linked list
+ * @head_ref: Pointer to the head of the list
+ * 
+ * Return: Pointer to the new head of the reversed list.
+ */
+
+listint_t *reverse_list(listint_t **head_ref)
+{
+    listint_t *prev = NULL;
+    listint_t *current = *head_ref;
+    listint_t *next = NULL;
+
+    while (current != NULL)
+    {
+        next = current->next;
+        current->next = prev;
+        prev = current;
+        current = next;
+    }
+
+    *head_ref = prev; /* Update the head to the new head of the reversesd list */
+    return *head_ref;
+}
+
